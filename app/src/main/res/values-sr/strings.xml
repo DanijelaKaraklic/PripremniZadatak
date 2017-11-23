@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Глумци</string>
+
+    <string name="activity_main_name">Главна активност</string>
+    <string name="activity_main_toolbar_title">Главна активност</string>
+
+    <string name="activity_settings_name">Подешавања</string>
+
+    <string name="fragment_detail_buy">Купи</string>
+
+
+
+
+    <string name="dialog_about_title">О апликацији</string>
+    <string name="dialog_about_message">Ову апликацију је правила Данијела Караклић</string>
+    <string name="dialog_about_yes">У реду</string>
+    <string name="dialog_about_no">Одустани</string>
+
+    <string name="pref_sync">преф_синк</string>
+    <string name="pref_sync_title">Омогући синхронизацију</string>
+    <string name="pref_sync_summ">Омогући да апликација аутоматски синхронизује податке ако је Wi-fi мрежа доступна</string>
+    <string name="pref_syncConnectionType">Интервал синхронизације</string>
+    <string name="pref_sync_list">преф_синк_лист</string>
+
+    <string name="detail_activity">Активност детаљ</string>
+    <string name="pref_edit">pref_edit</string>
+    <string name="dialog_insert_name">Insert name of actor</string>
+    <string name="dialog_insert_surname">Insert surname of an actor</string>
+    <string name="dialog_insert_rating">Insert rating</string>
+    <string name="dialog_insert_biogrphy">Insert biogrphy</string>
+    <string name="dialog_insert_birthday">Insert birthday</string>
+    <string name="dialog_isert_ok">OK</string>
+    <string name="dialog_insert_cancel">CANCEL</string>
+    <string name="dialog_insert_name_of_film">Insert name of film</string>
+    <string name="dialog_insert_genre">Insert genre</string>
+    <string name="dialog_insert_year_of_release">Insert year of release</string>
+
+
+</resources>
