@@ -11,10 +11,10 @@ import com.j256.ormlite.table.DatabaseTable;
 
 
 
-@DatabaseTable(tableName = Film.TABLE_NAME_USERS)
+@DatabaseTable(tableName = Film.TABLE_NAME_FILMS)
 public class Film {
 
-    public static final String TABLE_NAME_USERS = "film";
+    public static final String TABLE_NAME_FILMS = "film";
 
     public static final String FIELD_NAME_ID = "id";
     public static final String FIELD_NAME_NAME = "nazivFilma";

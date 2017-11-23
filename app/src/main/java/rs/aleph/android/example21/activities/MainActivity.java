@@ -1,10 +1,15 @@
 package rs.aleph.android.example21.activities;
 
 import android.app.Dialog;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +34,7 @@ import java.util.List;
 import rs.aleph.android.example21.R;
 import rs.aleph.android.example21.db.DatabaseHelper;
 import rs.aleph.android.example21.db.model.Glumac;
+import rs.aleph.android.example21.dialogs.AboutDialog;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -123,41 +129,19 @@ public class MainActivity extends AppCompatActivity{
 
 
         if (savedInstanceState == null) {
-           /* Glumac glumac = new Glumac();
 
-            glumac.setmId(savedInstanceState.getInt("id"));*/
-           /* SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy.");
-            Date datum = null;
-            try {
-                datum = sdf.parse("12.04.1966.");
-
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            Glumac glumac = new Glumac();
-            glumac.setmName("Itan");
-            glumac.setmSurname("Houk");
-            glumac.setmRating(3.2f);
-            glumac.setmBiography("Dobio je Oskara za ...");
-            glumac.setmBirthday(datum);
-            try {
-                getDatabaseHelper().getGlumacDao().create(glumac);
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }*/
 
         }
 
 
 
-        List<Glumac> glumci = new ArrayList<Glumac>();
+       /* List<Glumac> glumci = new ArrayList<Glumac>();
         try {
              glumci = getDatabaseHelper().getGlumacDao().queryForAll();
 
         } catch (SQLException e) {
             e.printStackTrace();
-        }
+        }*/
 
 
 
@@ -240,9 +224,21 @@ public class MainActivity extends AppCompatActivity{
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final boolean toast = sharedPreferences.getBoolean("@string/pref_checkout_toast",true);
+        final boolean notification = sharedPreferences.getBoolean("@string/pref_checkout_notification",false);
+
         switch (item.getItemId()) {
-            case R.id.action_edit:
-                Toast.makeText(MainActivity.this, "Sinhronizacija pokrenuta u pozadini niti. dobro :)",Toast.LENGTH_SHORT).show();
+            case R.id.action_about:
+                if (dialog == null){
+                    dialog = new AboutDialog(MainActivity.this).prepareDialog();
+                } else {
+                    if (dialog.isShowing()) {
+                        dialog.dismiss();
+                    }
+                }
+
+                dialog.show();
 
                 break;
             case R.id.action_add:
@@ -308,6 +304,27 @@ public class MainActivity extends AppCompatActivity{
                         glumac.setmBirthday(birthdayA);
                         try {
                             getDatabaseHelper().getGlumacDao().create(glumac);
+                            if (toast && notification){
+                                NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this);
+                                builder.setContentTitle("Dodavanje glumca");
+                                builder.setContentText("Uspesan unos glumca u bazu.");
+                                NotificationManager manager = (NotificationManager)MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                manager.notify(NOTIFICATION_ID, builder.build());
+
+                                Toast.makeText(MainActivity.this, "Dodali ste glumca uspesno u bazu.",Toast.LENGTH_SHORT).show();
+
+                            }else if (!toast && notification){
+                                NotificationCompat.Builder builder = new NotificationCompat.Builder(MainActivity.this);
+                                builder.setContentTitle("Dodavanje glumca");
+                                builder.setContentText("Uspesan unos glumca u bazu.");
+                                NotificationManager manager = (NotificationManager)MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                manager.notify(NOTIFICATION_ID, builder.build());
+
+                            }else if (toast && !notification){
+
+                                Toast.makeText(MainActivity.this, "Dodali ste glumca uspesno u bazu.",Toast.LENGTH_SHORT).show();
+
+                            }
 
                             refresh();
                         } catch (SQLException e) {
@@ -331,7 +348,9 @@ public class MainActivity extends AppCompatActivity{
                 dialog.show();
 
                 break;
-            case R.id.action_delete:
+            case R.id.action_settings:
+                Intent intent = new Intent(MainActivity.this,SettingsActivity.class);
+                startActivity(intent);
 
                 break;
         }

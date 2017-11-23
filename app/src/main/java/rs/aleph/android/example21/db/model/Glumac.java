@@ -11,9 +11,9 @@ import java.util.Date;
 /**
  * Created by KaraklicDM on 22.11.2017.
  */
-@DatabaseTable(tableName = Glumac.TABLE_NAME_USERS)
+@DatabaseTable(tableName = Glumac.TABLE_NAME_ACTORS)
 public class Glumac{
-    public static final String TABLE_NAME_USERS = "glumac";
+    public static final String TABLE_NAME_ACTORS = "glumac";
 
     public static final String FIELD_NAME_ID = "id";
     public static final String FIELD_NAME_NAME = "ime";
@@ -21,7 +21,7 @@ public class Glumac{
     public static final String FIELD_NAME_BIRTHDAY = "datumRodjenja";
     public static final String FIELD_NAME_BIOGRAPHY= "biografija";
     public static final String FIELD_NAME_RATING = "rating";
-    public static final String FIELD_NAME_FILMS = "filmovi";
+    public static final String FIELD_NAME_FILMS = "film";
 
 
     @DatabaseField(columnName = FIELD_NAME_ID,generatedId = true)

@@ -1,9 +1,14 @@
 package rs.aleph.android.example21.activities;
 
 import android.app.Dialog;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,8 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
-import com.j256.ormlite.dao.CloseableIterator;
-import com.j256.ormlite.dao.ForeignCollection;
 
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -64,7 +67,7 @@ public class DetailActivity extends AppCompatActivity {
             SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy.");
             String birthday = sdf.format(glumac.getmBirthday());
             String biography = glumac.getmBiography();
-
+            //ispisali smo na ekranu osnovne podatke o glumcu
             TextView tv_name = (TextView)findViewById(R.id.name);
             tv_name.setText(name);
             TextView tv_surname = (TextView)findViewById(R.id.surname);
@@ -76,20 +79,26 @@ public class DetailActivity extends AppCompatActivity {
             TextView tv_biography = (TextView)findViewById(R.id.biography);
             tv_biography.setText(biography);
 
-            ForeignCollection<Film> filmovi =  glumac.getmFilms();
-          /*  List<Film> films = getDatabaseHelper().getFilmDao().queryForAll();
-            List<Film> actorFilm = new ArrayList<>();
+
+            ListView listView = (ListView)findViewById(R.id.lv_films);
+            List<Film> films = getDatabaseHelper().getFilmDao().
+                    queryBuilder().
+                    where().
+                    eq(Film.FIELD_NAME_GLUMAC,identifikator).
+                    query();
+            List<String> filmsString = new ArrayList<>();
             for (Film f:films) {
-                if (f.getGlumac().getmId() == glumac.getmId()){
-                    actorFilm.add(f);
-                }
-            }*/
+                filmsString.add(f.getmName());
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(DetailActivity.this,R.layout.list_item,filmsString);
+
+
+            //ListAdapter adapter = new ArrayAdapter<Film>(DetailActivity.this,R.layout.list_item,films);
+            listView.setAdapter(adapter);
+
+
+            /*ForeignCollection<Film> filmovi =  glumac.getmFilms();
             List<String> filmoviString = new ArrayList<String>();
-           /* for (Film f:actorFilm) {
-                filmoviString.add(f.getmName());
-            }*/
-
-
             CloseableIterator<Film> iterator = filmovi.closeableIterator();
 
             try {
@@ -108,10 +117,10 @@ public class DetailActivity extends AppCompatActivity {
             }
             finally {
                 iterator.close();
-            }
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(DetailActivity.this,R.layout.list_item,filmoviString);
-            ListView listView = (ListView)findViewById(R.id.lv_films);
-            listView.setAdapter(adapter);
+            }*/
+
+
+
 
 
 
@@ -190,6 +199,9 @@ public class DetailActivity extends AppCompatActivity {
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final boolean toast = sharedPreferences.getBoolean("@string/pref_checkout_toast",false);
+        final boolean notification = sharedPreferences.getBoolean("@string/pref_checkout_notification",false);
         switch (item.getItemId()) {
             case R.id.action_edit:
                 //Toast.makeText(DetailActivity.this, "",Toast.LENGTH_SHORT).show();
@@ -263,7 +275,28 @@ public class DetailActivity extends AppCompatActivity {
                         }
                         try {
                             getDatabaseHelper().getGlumacDao().update(glumac);
-                            //refresh();
+                            if (toast && notification){
+                                NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
+                                builder.setContentTitle("Azuriranje podataka  o glumcu");
+                                builder.setContentText("Uspesno azuriranje glumca.");
+                                NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                manager.notify(2, builder.build());
+
+                                Toast.makeText(DetailActivity.this, "Uspesno azuriranje glumca.",Toast.LENGTH_SHORT).show();
+
+                            }else if (!toast && notification){
+                                NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
+                                builder.setContentTitle("Azuriranje podataka  o glumcu");
+                                builder.setContentText("Uspesno azuriranje glumca.");
+                                NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                manager.notify(2, builder.build());
+
+                            }else if (toast && !notification){
+
+                                Toast.makeText(DetailActivity.this, "Uspesno azuriranje glumca.",Toast.LENGTH_SHORT).show();
+
+                            }
+                            refresh();
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
@@ -335,6 +368,27 @@ public class DetailActivity extends AppCompatActivity {
                         film.setmGodinaIzlaska(yearA);
                         try {
                             getDatabaseHelper().getFilmDao().create(film);
+                            if (toast && notification){
+                                NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
+                                builder.setContentTitle("Dodavanje filma");
+                                builder.setContentText("Uspesno ste uneli film u bazu.");
+                                NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                manager.notify(3, builder.build());
+
+                                Toast.makeText(DetailActivity.this, "Uspesno ste uneli film u bazu.",Toast.LENGTH_SHORT).show();
+
+                            }else if (!toast && notification){
+                                NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
+                                builder.setContentTitle("Dodavanje filma");
+                                builder.setContentText("Uspesno ste uneli film u bazu.");
+                                NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                manager.notify(3, builder.build());
+
+                            }else if (toast && !notification){
+
+                                Toast.makeText(DetailActivity.this, "Uspesno ste uneli film u bazu..",Toast.LENGTH_SHORT).show();
+
+                            }
 
                             refresh();
                         } catch (SQLException e) {
@@ -368,6 +422,27 @@ public class DetailActivity extends AppCompatActivity {
 
                     if (glumac != null)
                         getDatabaseHelper().getGlumacDao().delete(glumac);
+                    if (toast && notification){
+                        NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
+                        builder.setContentTitle("Brisanje glumca");
+                        builder.setContentText("Uspesno ste izbrisali glumca.");
+                        NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                        manager.notify(3, builder.build());
+
+                        Toast.makeText(DetailActivity.this, "Uspesno ste izbrisali glumca.",Toast.LENGTH_SHORT).show();
+
+                    }else if (!toast && notification){
+                        NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
+                        builder.setContentTitle("Brisanje glumca");
+                        builder.setContentText("Uspesno ste izbrisali glumca.");
+                        NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                        manager.notify(3, builder.build());
+
+                    }else if (toast && !notification){
+
+                        Toast.makeText(DetailActivity.this, "Uspesno ste izbrisali glumca.",Toast.LENGTH_SHORT).show();
+
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -382,14 +457,60 @@ public class DetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
     private void refresh() {
         ListView listview = (ListView) findViewById(R.id.lv_films);
         if (listview != null){
             ArrayAdapter<Film> adapter = (ArrayAdapter<Film>) listview.getAdapter();
             if(adapter!= null){
                 adapter.clear();
-              /*  ForeignCollection<Film> filmovi =  glumac.getmFilms();
-                CloseableIterator<Film> iterator = filmovi.closeableIterator();*/
+                try {
+                    List<Film> list = getDatabaseHelper().getFilmDao().
+                            queryBuilder().
+                            where().
+                            eq(Film.FIELD_NAME_GLUMAC,identifikator).
+                            query();
+
+
+
+
+
+                    //list = getDatabaseHelper().getFilmDao().queryForAll();
+
+                  /*  ForeignCollection<Film> films = getDatabaseHelper().getGlumacDao().queryForId(identifikator).getmFilms();
+                    CloseableIterator<Film> iterator = films.closeableIterator();
+                    try {
+                        while (iterator.hasNext()) {
+                            Film f =iterator.next();
+
+
+                            list.add(f);
+
+
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        iterator.close();
+                    }*/
+                    //getDatabaseHelper().getFilmDao().queryForAll();
+                    adapter.addAll(list);
+                    adapter.notifyDataSetChanged();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+
+                }
+            }
+        }
+    }
+   /* private void refresh() {
+        ListView listview = (ListView) findViewById(R.id.lv_films);
+        if (listview != null){
+            ArrayAdapter<Film> adapter = (ArrayAdapter<Film>) listview.getAdapter();
+            if(adapter!= null){
+                adapter.clear();
+              *//*  ForeignCollection<Film> filmovi =  glumac.getmFilms();
+                CloseableIterator<Film> iterator = filmovi.closeableIterator();*//*
                 List<Film> list = new ArrayList<Film>();
                 try {
                     List<Film> films = getDatabaseHelper().getFilmDao().queryForAll();
@@ -403,7 +524,7 @@ public class DetailActivity extends AppCompatActivity {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-                /*try {
+                *//*try {
 
                     while (iterator.hasNext()) {
                         Film g=iterator.next();
@@ -426,14 +547,14 @@ public class DetailActivity extends AppCompatActivity {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
-                }*/
+                }*//*
 
 
 
 
             }
         }
-    }
+    }*/
 
    /* @Override
     public void setTitle(CharSequence title) {

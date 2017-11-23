@@ -7,11 +7,17 @@
         
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="@string/pref_sync"
-            android:summary="@string/pref_sync_summ"
-            android:title="@string/pref_sync_title" />
+            android:key="@string/pref_checkout_toast"
+            android:summary="@string/pref_sum_toast"
+            android:title="@string/pref_toast_title" />
 
-        <ListPreference
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_checkout_notification"
+            android:summary="@string/pref_su_notification"
+            android:title="@string/pref_notification_title" />
+
+<!--        <ListPreference
             android:dependency="@string/pref_sync"
             android:dialogTitle="@string/pref_syncConnectionType"
             android:entries="@array/pref_syncConnectionTypes_entries"
@@ -23,7 +29,7 @@
         <EditTextPreference
             android:key="@string/pref_edit"
             android:title="Input data">
-        </EditTextPreference>
+        </EditTextPreference>-->
         
     </PreferenceCategory>
 

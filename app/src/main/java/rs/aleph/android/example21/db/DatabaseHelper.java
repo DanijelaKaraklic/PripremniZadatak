@@ -23,10 +23,10 @@ import rs.aleph.android.example21.db.model.Glumac;
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
     //Dajemo ime bazi
-    private static final String DATABASE_NAME    = "ormlite5.db";
+    private static final String DATABASE_NAME = "ormlite8.db";
 
     //i pocetnu verziju baze. Obicno krece od 1
-    private static final int    DATABASE_VERSION = 5;
+    private static final int    DATABASE_VERSION = 8;
 
     private Dao<Glumac, Integer> mGlumacDao = null;
     private Dao<Film,Integer> mFilmDao = null;
@@ -41,8 +41,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
         try {
-            TableUtils.createTable(connectionSource, Film.class);
-            TableUtils.createTable(connectionSource,Glumac.class);
+            TableUtils.createTable(connectionSource, Glumac.class);
+            TableUtils.createTable(connectionSource,Film.class);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -52,8 +52,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, ConnectionSource connectionSource, int oldVersion, int newVersion) {
         try {
-            TableUtils.dropTable(connectionSource, Glumac.class, true);
-            TableUtils.dropTable(connectionSource,Film.class,true);
+            TableUtils.dropTable(connectionSource, Film.class, true);
+            TableUtils.dropTable(connectionSource,Glumac.class,true);
             onCreate(db, connectionSource);
         } catch (SQLException e) {
             throw new RuntimeException(e);
