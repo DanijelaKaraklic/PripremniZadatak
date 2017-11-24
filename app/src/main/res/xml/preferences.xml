@@ -7,13 +7,13 @@
         
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="@string/pref_checkout_toast"
+            android:key="pref_checkout_toast"
             android:summary="@string/pref_sum_toast"
             android:title="@string/pref_toast_title" />
 
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="@string/pref_checkout_notification"
+            android:key="pref_checkout_notification"
             android:summary="@string/pref_su_notification"
             android:title="@string/pref_notification_title" />
 

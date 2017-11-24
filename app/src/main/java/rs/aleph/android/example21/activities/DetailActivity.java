@@ -5,6 +5,8 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -13,12 +15,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RatingBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -26,8 +29,6 @@ import com.j256.ormlite.android.apptools.OpenHelperManager;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import rs.aleph.android.example21.R;
@@ -46,146 +47,139 @@ public class DetailActivity extends AppCompatActivity {
 
 
 
-    private int identifikator;
+
     private  Glumac glumac;
+    boolean toast;
+    boolean notification;
+    private SharedPreferences sharedPreferences;
+
+    private SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy.");
+
+    private EditText name;
+    private EditText surname ;
+    private RatingBar rating;
+    private EditText biography;
+    private EditText birthday;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.detail_activity);
+        //PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        // Enable ActionBar app icon to behave as action to toggle nav drawer
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_detail);
+        if (toolbar!= null) {
+            setSupportActionBar(toolbar);
+        }
 
 
         Intent intent = getIntent();
-        identifikator = intent.getExtras().getInt("identifikator");
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        int identifikator = intent.getExtras().getInt("identifikator");
 
         try {
-            glumac= getDatabaseHelper().getGlumacDao().queryForId((int)identifikator);
-            String name = glumac.getmName();
-            String surname = glumac.getmSurname();
-            float rating = glumac.getmRating();
-            SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy.");
-            String birthday = sdf.format(glumac.getmBirthday());
-            String biography = glumac.getmBiography();
+            glumac= getDatabaseHelper().getGlumacDao().queryForId(identifikator);
+
+
             //ispisali smo na ekranu osnovne podatke o glumcu
-            TextView tv_name = (TextView)findViewById(R.id.name);
-            tv_name.setText(name);
-            TextView tv_surname = (TextView)findViewById(R.id.surname);
-            tv_surname.setText(surname);
-            RatingBar tv_rating = (RatingBar) findViewById(R.id.rating);
-            tv_rating.setRating(rating);
-            TextView tv_birthday = (TextView)findViewById(R.id.birthday);
-            tv_birthday.setText(birthday);
-            TextView tv_biography = (TextView)findViewById(R.id.biography);
-            tv_biography.setText(biography);
-
-
-            ListView listView = (ListView)findViewById(R.id.lv_films);
-            List<Film> films = getDatabaseHelper().getFilmDao().
-                    queryBuilder().
-                    where().
-                    eq(Film.FIELD_NAME_GLUMAC,identifikator).
-                    query();
-            List<String> filmsString = new ArrayList<>();
-            for (Film f:films) {
-                filmsString.add(f.getmName());
-            }
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(DetailActivity.this,R.layout.list_item,filmsString);
-
-
-            //ListAdapter adapter = new ArrayAdapter<Film>(DetailActivity.this,R.layout.list_item,films);
-            listView.setAdapter(adapter);
-
-
-            /*ForeignCollection<Film> filmovi =  glumac.getmFilms();
-            List<String> filmoviString = new ArrayList<String>();
-            CloseableIterator<Film> iterator = filmovi.closeableIterator();
-
-            try {
-
-                while (iterator.hasNext()) {
-                    Film g=iterator.next();
-                    if(g.getGlumac().getmId() == glumac.getmId()) {
-                        filmoviString.add(g.getmName());
-                    }
-
-                }
-            } catch(Exception e)
-            {
-                Toast.makeText(DetailActivity.this, "Greska prilikom iteracije.",Toast.LENGTH_SHORT).show();
-
-            }
-            finally {
-                iterator.close();
-            }*/
-
-
-
-
-
-
-
-
-
-         /*   FloatingActionButton button = (FloatingActionButton) view.findViewById(R.id.buy);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Creates notification with the notification builder
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity());
-                    Bitmap bitmap = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.ic_stat_buy);
-                    builder.setSmallIcon(R.drawable.ic_stat_buy);
-                    builder.setContentTitle(getActivity().getString(R.string.notification_title));
-                    builder.setContentText(getActivity().getString(R.string.notification_text));
-                    builder.setLargeIcon(bitmap);
-
-                    // Shows notification with the notification manager (notification ID is used to update the notification later on)
-                    NotificationManager manager = (NotificationManager)getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-                    manager.notify(NOTIFICATION_ID, builder.build());
-                }
-            });*/
-
+            name= (EditText)findViewById(R.id.actor_name);
+            name.setText(glumac.getmName());
+            surname = (EditText)findViewById(R.id.actor_surname);
+            surname.setText(glumac.getmSurname());
+            rating = (RatingBar) findViewById(R.id.acrtor_rating);
+            rating.setRating(glumac.getmRating());
+            birthday = (EditText)findViewById(R.id.actor_birthday);
+            birthday.setText(sdf.format(glumac.getmBirthday()));
+            biography = (EditText)findViewById(R.id.actor_biography);
+            biography.setText(glumac.getmBiography());
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
 
+        final ListView listView = (ListView)findViewById(R.id.lv_films);
 
 
+        try {
+            List<Film>  films = getDatabaseHelper().getFilmDao()
+                    .queryBuilder()
+                    .where()
+                    .eq(Film.FIELD_NAME_GLUMAC,glumac.getmId())
+                    .query();
+            ListAdapter adapter = new ArrayAdapter<>(DetailActivity.this,R.layout.list_item,films);
+            listView.setAdapter(adapter);
 
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Film m = (Film) listView.getItemAtPosition(position);
+                    Toast.makeText(DetailActivity.this, m.getmName()+" "+m.getmZanr()+" "+m.getmGodinaIzlaska(), Toast.LENGTH_SHORT).show();
 
+                }
+            });
 
-
-        // Enable ActionBar app icon to behave as action to toggle nav drawer
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_detail);
-        setSupportActionBar(toolbar);
-        final android.support.v7.app.ActionBar actionBar = getSupportActionBar();
-
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            //actionBar.setHomeAsUpIndicator(R.drawable.ic_drawer);
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.show();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-
-
-        if (savedInstanceState == null) {
-
-        }
-
-
-
 
     }
 
-    public DatabaseHelper getDatabaseHelper() {
-        if (databaseHelper == null) {
-            databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
+
+    private void refresh() {
+        ListView listview = (ListView) findViewById(R.id.lv_films);
+        if (listview != null){
+            ArrayAdapter<Film> adapter = (ArrayAdapter<Film>) listview.getAdapter();
+            if(adapter != null){
+
+                try {
+                    adapter.clear();
+
+                    List<Film> films = getDatabaseHelper().getFilmDao()
+                            .queryBuilder()
+                            .where()
+                            .eq(Film.FIELD_NAME_GLUMAC,glumac.getmId())
+                            .query();
+
+
+                    adapter.addAll(films);
+                    adapter.notifyDataSetChanged();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+
+                }
+            }
         }
-        return databaseHelper;
     }
+
+    private void showStatusMesage(String message){
+        NotificationManager mNotificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+        mBuilder.setSmallIcon(R.drawable.ic_launcher);
+        mBuilder.setContentTitle("Operacije nad bazom");
+        mBuilder.setContentText(message);
+
+        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_add);
+
+        mBuilder.setLargeIcon(bm);
+        // notificationID allows you to update the notification later on.
+        mNotificationManager.notify(1, mBuilder.build());
+    }
+
+    private void showMessage(String message){
+        //provera podesenja
+        boolean toast = sharedPreferences.getBoolean("pref_checkout_toast", false);
+        boolean status = sharedPreferences.getBoolean("pref_checkout_notification", false);
+
+        if (toast){
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
+
+        if (status){
+            showStatusMesage(message);
+        }
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -199,257 +193,81 @@ public class DetailActivity extends AppCompatActivity {
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+       /* sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         final boolean toast = sharedPreferences.getBoolean("@string/pref_checkout_toast",false);
-        final boolean notification = sharedPreferences.getBoolean("@string/pref_checkout_notification",false);
+        final boolean notification = sharedPreferences.getBoolean("@string/pref_checkout_notification",false);*/
         switch (item.getItemId()) {
             case R.id.action_edit:
-                //Toast.makeText(DetailActivity.this, "",Toast.LENGTH_SHORT).show();
-                final Dialog dialog1 = new Dialog(DetailActivity.this);
-                dialog1.setContentView(R.layout.dialog_layout);
-                dialog1.setTitle("Update an actor");
-                final EditText name1 = (EditText)dialog1.findViewById(R.id.actor_name);
-                final EditText surname = (EditText)dialog1.findViewById(R.id.actor_surname);
-                final EditText rating = (EditText)dialog1.findViewById(R.id.actor_rating);
-                final EditText biography = (EditText)dialog1.findViewById(R.id.actor_biography);
-                final EditText birthday = (EditText)dialog1.findViewById(R.id.actor_birthday);
-                Button ok1 = (Button) dialog1.findViewById(R.id.ok);
-                ok1.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View v) {
+                glumac.setmName(name.getText().toString());
+                glumac.setmSurname(surname.getText().toString());
+                try {
+                    glumac.setmBirthday(sdf.parse(birthday.getText().toString()));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                glumac.setmBiography(biography.getText().toString());
+                glumac.setmRating(rating.getRating());
 
+                try {
+                    getDatabaseHelper().getGlumacDao().update(glumac);
 
+                    showMessage("Actor detail updated");
 
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd.mm.yyyy.");
-                        String nameA = name1.getText().toString();
-                       /* if (nameA == ""){
-                            Toast.makeText(DetailActivity.this, "Ime ne moze biti prazan string",Toast.LENGTH_SHORT).show();
-                            return;
-
-                        }*/
-
-
-                        String surnameA = surname.getText().toString();
-                        /*if (surnameA == ""){
-                            Toast.makeText(DetailActivity.this, "Prezime ne moze biti prazan string",Toast.LENGTH_SHORT).show();
-                            return;
-
-                        }*/
-
-                        float ratingA = 0;
-                        try {
-                            ratingA = Float.parseFloat(rating.getText().toString());
-                        } catch (NumberFormatException e) {
-                            Toast.makeText(DetailActivity.this, "Treba da unesete ocenu u obliku decimalnog broja.",Toast.LENGTH_SHORT).show();
-
-                            //e.printStackTrace();
-                        }
-                        String biographyA = biography.getText().toString();
-                        /*if (biographyA == ""){
-                            Toast.makeText(DetailActivity.this, "Biografija ne moze biti prazan string",Toast.LENGTH_SHORT).show();
-                            return;
-                        }*/
-
-                        Date birthdayA = null;
-                        try {
-                            birthdayA = sdf.parse(birthday.getText().toString());
-                        } catch (ParseException e) {
-                            Toast.makeText(DetailActivity.this, "Treba da unesete datum u obliku dd.mm.yyyy.",Toast.LENGTH_SHORT).show();
-
-                            //e.printStackTrace();
-                        }
-
-                        Glumac glumac = new Glumac();
-                        if (nameA != null) {
-                            glumac.setmName(nameA);
-                        }
-                        if (surnameA != null) {
-                            glumac.setmSurname(surnameA);
-                        }
-                        glumac.setmRating(ratingA);
-                        if (biographyA != null) {
-                            glumac.setmBiography(biographyA);
-                        }
-                        if (birthdayA != null) {
-                            glumac.setmBirthday(birthdayA);
-                        }
-                        try {
-                            getDatabaseHelper().getGlumacDao().update(glumac);
-                            if (toast && notification){
-                                NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
-                                builder.setContentTitle("Azuriranje podataka  o glumcu");
-                                builder.setContentText("Uspesno azuriranje glumca.");
-                                NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                                manager.notify(2, builder.build());
-
-                                Toast.makeText(DetailActivity.this, "Uspesno azuriranje glumca.",Toast.LENGTH_SHORT).show();
-
-                            }else if (!toast && notification){
-                                NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
-                                builder.setContentTitle("Azuriranje podataka  o glumcu");
-                                builder.setContentText("Uspesno azuriranje glumca.");
-                                NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                                manager.notify(2, builder.build());
-
-                            }else if (toast && !notification){
-
-                                Toast.makeText(DetailActivity.this, "Uspesno azuriranje glumca.",Toast.LENGTH_SHORT).show();
-
-                            }
-                            refresh();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                        dialog1.dismiss();
-
-                    }
-
-
-                });
-
-                Button cancel1 = (Button) dialog1.findViewById(R.id.cancel);
-                cancel1.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View v) {
-                        dialog1.dismiss();
-                    }
-                });
-
-                dialog1.show();
-
-
-
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
 
                 break;
             case R.id.action_add:
-                final Dialog dialog = new Dialog(DetailActivity.this);
+                //OTVORI SE DIALOG UNESETE INFORMACIJE
+                final Dialog dialog = new Dialog(this);
                 dialog.setContentView(R.layout.dialog_detail);
-                dialog.setTitle("Input a film");
 
-
-
-                final EditText name = (EditText)dialog.findViewById(R.id.film_name);
-                final EditText genre = (EditText)dialog.findViewById(R.id.film_genre);
-                final EditText year = (EditText)dialog.findViewById(R.id.film_year);
-
-                Button ok = (Button) dialog.findViewById(R.id.ok);
-                ok.setOnClickListener(new View.OnClickListener(){
+                Button add = (Button) dialog.findViewById(R.id.ok);
+                add.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
-
-
-
-                        String nameA = name.getText().toString();
-                        if (nameA == ""){
-                            Toast.makeText(DetailActivity.this, "Ime ne moze biti prazan string",Toast.LENGTH_SHORT).show();
-                            return;
-
-                        }
-
-
-                        String genreA = genre.getText().toString();
-                        if (genreA == ""){
-                            Toast.makeText(DetailActivity.this, "Zanr ne moze biti prazan string",Toast.LENGTH_SHORT).show();
-                            return;
-
-                        }
-                        int yearA = 0;
-                        try {
-                            yearA = Integer.parseInt(year.getText().toString());
-                        } catch (NumberFormatException e) {
-                            Toast.makeText(DetailActivity.this, "Unesite broj koji je ceo.",Toast.LENGTH_SHORT).show();
-
-                        }
+                        EditText name = (EditText) dialog.findViewById(R.id.film_name);
+                        EditText genre = (EditText) dialog.findViewById(R.id.film_genre);
+                        EditText year = (EditText) dialog.findViewById(R.id.film_year);
 
                         Film film = new Film();
-                        film.setmName(nameA);
-                        film.setmZanr(genreA);
-                        film.setmGodinaIzlaska(yearA);
+                        film.setmName(name.getText().toString());
+                        film.setmZanr(genre.getText().toString());
+                        film.setmGodinaIzlaska(Integer.parseInt(year.getText().toString()));
+                        film.setGlumac(glumac);
+
+
+
                         try {
                             getDatabaseHelper().getFilmDao().create(film);
-                            if (toast && notification){
-                                NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
-                                builder.setContentTitle("Dodavanje filma");
-                                builder.setContentText("Uspesno ste uneli film u bazu.");
-                                NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                                manager.notify(3, builder.build());
-
-                                Toast.makeText(DetailActivity.this, "Uspesno ste uneli film u bazu.",Toast.LENGTH_SHORT).show();
-
-                            }else if (!toast && notification){
-                                NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
-                                builder.setContentTitle("Dodavanje filma");
-                                builder.setContentText("Uspesno ste uneli film u bazu.");
-                                NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                                manager.notify(3, builder.build());
-
-                            }else if (toast && !notification){
-
-                                Toast.makeText(DetailActivity.this, "Uspesno ste uneli film u bazu..",Toast.LENGTH_SHORT).show();
-
-                            }
-
-                            refresh();
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
-                        dialog.dismiss();
+                        //URADITI REFRESH
+                        refresh();
 
-                    }
+                        showMessage("New movie added to actor");
 
-
-                });
-
-                Button cancel = (Button) dialog.findViewById(R.id.cancel);
-                cancel.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View v) {
                         dialog.dismiss();
                     }
                 });
 
                 dialog.show();
 
-
-
-                    //Toast.makeText(DetailActivity.this, "",Toast.LENGTH_SHORT).show();
-
                 break;
             case R.id.action_delete:
-
                 try {
-
-                    if (glumac != null)
+                    if (glumac != null) {
                         getDatabaseHelper().getGlumacDao().delete(glumac);
-                    if (toast && notification){
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
-                        builder.setContentTitle("Brisanje glumca");
-                        builder.setContentText("Uspesno ste izbrisali glumca.");
-                        NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                        manager.notify(3, builder.build());
-
-                        Toast.makeText(DetailActivity.this, "Uspesno ste izbrisali glumca.",Toast.LENGTH_SHORT).show();
-
-                    }else if (!toast && notification){
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(DetailActivity.this);
-                        builder.setContentTitle("Brisanje glumca");
-                        builder.setContentText("Uspesno ste izbrisali glumca.");
-                        NotificationManager manager = (NotificationManager)DetailActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                        manager.notify(3, builder.build());
-
-                    }else if (toast && !notification){
-
-                        Toast.makeText(DetailActivity.this, "Uspesno ste izbrisali glumca.",Toast.LENGTH_SHORT).show();
-
                     }
+
+                    showMessage("Actor deleted");
+
+                    finish(); //moramo pozvati da bi se vratili na prethodnu aktivnost
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-
-
-
-                //Toast.makeText(DetailActivity.this, "",Toast.LENGTH_SHORT).show();
 
                 break;
         }
@@ -457,109 +275,24 @@ public class DetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-    private void refresh() {
-        ListView listview = (ListView) findViewById(R.id.lv_films);
-        if (listview != null){
-            ArrayAdapter<Film> adapter = (ArrayAdapter<Film>) listview.getAdapter();
-            if(adapter!= null){
-                adapter.clear();
-                try {
-                    List<Film> list = getDatabaseHelper().getFilmDao().
-                            queryBuilder().
-                            where().
-                            eq(Film.FIELD_NAME_GLUMAC,identifikator).
-                            query();
-
-
-
-
-
-                    //list = getDatabaseHelper().getFilmDao().queryForAll();
-
-                  /*  ForeignCollection<Film> films = getDatabaseHelper().getGlumacDao().queryForId(identifikator).getmFilms();
-                    CloseableIterator<Film> iterator = films.closeableIterator();
-                    try {
-                        while (iterator.hasNext()) {
-                            Film f =iterator.next();
-
-
-                            list.add(f);
-
-
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        iterator.close();
-                    }*/
-                    //getDatabaseHelper().getFilmDao().queryForAll();
-                    adapter.addAll(list);
-                    adapter.notifyDataSetChanged();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-
-                }
-            }
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refresh();
     }
-   /* private void refresh() {
-        ListView listview = (ListView) findViewById(R.id.lv_films);
-        if (listview != null){
-            ArrayAdapter<Film> adapter = (ArrayAdapter<Film>) listview.getAdapter();
-            if(adapter!= null){
-                adapter.clear();
-              *//*  ForeignCollection<Film> filmovi =  glumac.getmFilms();
-                CloseableIterator<Film> iterator = filmovi.closeableIterator();*//*
-                List<Film> list = new ArrayList<Film>();
-                try {
-                    List<Film> films = getDatabaseHelper().getFilmDao().queryForAll();
-                    for (Film f:films) {
-                        if (f.getGlumac().equals(glumac)){
-                            list.add(f);
-                        }
-                    }
-                    adapter.addAll(list);
-                    adapter.notifyDataSetChanged();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-                *//*try {
 
-                    while (iterator.hasNext()) {
-                        Film g=iterator.next();
-
-
-                       //list.add(g);
-                        //getDatabaseHelper().getFilmDao().queryForId(g.getmId())
-
-                    }
-                    adapter.addAll(list);
-                    adapter.notifyDataSetChanged();
-                } catch(Exception e)
-                {
-                    Toast.makeText(DetailActivity.this, "Greska prilikom iteracije.",Toast.LENGTH_SHORT).show();
-
-                }
-                finally {
-                    try {
-                        iterator.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }*//*
-
-
-
-
-            }
-        }
-    }*/
-
-   /* @Override
+    /* @Override
     public void setTitle(CharSequence title) {
         getSupportActionBar().setTitle(title);
     }*/
+
+
+    public DatabaseHelper getDatabaseHelper() {
+        if (databaseHelper == null) {
+            databaseHelper = OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+        return databaseHelper;
+    }
 
 
     @Override

@@ -14,9 +14,9 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName = Film.TABLE_NAME_FILMS)
 public class Film {
 
-    public static final String TABLE_NAME_FILMS = "film";
+    public static final String TABLE_NAME_FILMS = "films";
 
-    public static final String FIELD_NAME_ID = "id";
+    public static final String FIELD_NAME_ID = "id_film";
     public static final String FIELD_NAME_NAME = "nazivFilma";
     public static final String FIELD_NAME_ZANR = "zanr";
     public static final String FIELD_NAME_GODINA = "godinaIzlaska";

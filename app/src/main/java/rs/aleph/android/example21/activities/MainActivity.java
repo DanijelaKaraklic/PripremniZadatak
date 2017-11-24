@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity{
     private AlertDialog dialog;
     //za rad sa bazom
     private DatabaseHelper databaseHelper;
-
+    private SharedPreferences sharedPreferences;
 
 
 
@@ -51,11 +51,16 @@ public class MainActivity extends AppCompatActivity{
    // private int productId = 0;
     private static int NOTIFICATION_ID = 1;
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.main);
+        //PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final boolean toast = sharedPreferences.getBoolean("pref_checkout_toast",true);
+        final boolean notification = sharedPreferences.getBoolean("pref_checkout_notification",false);
 
        /* //showing notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
@@ -117,31 +122,14 @@ public class MainActivity extends AppCompatActivity{
 
         // Enable ActionBar app icon to behave as action to toggle nav drawer
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        final android.support.v7.app.ActionBar actionBar = getSupportActionBar();
 
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            //actionBar.setHomeAsUpIndicator(R.drawable.ic_drawer);
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.show();
-        }
-
-
-        if (savedInstanceState == null) {
-
-
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
         }
 
 
 
-       /* List<Glumac> glumci = new ArrayList<Glumac>();
-        try {
-             glumci = getDatabaseHelper().getGlumacDao().queryForAll();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }*/
 
 
 
@@ -160,6 +148,8 @@ public class MainActivity extends AppCompatActivity{
                     int identifikator = glumac.getmId();
                     Intent intent = new Intent(MainActivity.this,DetailActivity.class);
                     intent.putExtra("identifikator",(int)identifikator);
+                    //intent.putExtra("toast",toast);
+                    //intent.putExtra("notification",notification);
                     startActivity(intent);
                 }
             });
@@ -383,6 +373,12 @@ public class MainActivity extends AppCompatActivity{
         }
 
     }*/
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refresh();
+    }
 
     @Override
     protected void onDestroy() {

@@ -15,13 +15,13 @@ import java.util.Date;
 public class Glumac{
     public static final String TABLE_NAME_ACTORS = "glumac";
 
-    public static final String FIELD_NAME_ID = "id";
+    public static final String FIELD_NAME_ID = "id_glumac";
     public static final String FIELD_NAME_NAME = "ime";
     public static final String FIELD_NAME_SURNAME = "prezime";
     public static final String FIELD_NAME_BIRTHDAY = "datumRodjenja";
     public static final String FIELD_NAME_BIOGRAPHY= "biografija";
     public static final String FIELD_NAME_RATING = "rating";
-    public static final String FIELD_NAME_FILMS = "film";
+    public static final String FIELD_NAME_FILMS = "films";//Film.FIELD_NAME_GLUMAC
 
 
     @DatabaseField(columnName = FIELD_NAME_ID,generatedId = true)
@@ -39,8 +39,8 @@ public class Glumac{
     private float mRating;
 
 
-    @ForeignCollectionField(columnName = FIELD_NAME_FILMS, eager = true)
-    private ForeignCollection<Film> mFilms;
+    @ForeignCollectionField(columnName = Glumac.FIELD_NAME_FILMS,eager = true)
+    private ForeignCollection<Film> films;
 
     public Glumac() {
     }
@@ -95,12 +95,12 @@ public class Glumac{
         this.mRating = mRating;
     }
 
-    public ForeignCollection<Film> getmFilms() {
-        return mFilms;
+    public ForeignCollection<Film> getFilms() {
+        return films;
     }
 
-    public void setmFilms(ForeignCollection<Film> mFilms) {
-        this.mFilms = mFilms;
+    public void setFilms(ForeignCollection<Film> films) {
+        this.films = films;
     }
 
 
@@ -108,6 +108,7 @@ public class Glumac{
     public String toString() {
         return mName;
     }
+
 
 
 }

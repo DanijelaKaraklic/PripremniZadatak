@@ -17,11 +17,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+<!--
+        android:parentActivityName="rs.aleph.android.example21.activities.MainActivity"
+-->
         <activity
             android:name="rs.aleph.android.example21.activities.SettingsActivity"
             android:icon="@mipmap/ic_launcher"
 
-            android:parentActivityName="rs.aleph.android.example21.activities.MainActivity"
+
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name="rs.aleph.android.example21.activities.DetailActivity"
